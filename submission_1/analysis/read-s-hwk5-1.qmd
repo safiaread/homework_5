@@ -1,0 +1,158 @@
+---
+title: "Homework Five Submission 1"
+author: "Safia Read"
+format:
+  pdf:
+    output-file: "read-s-hwk5-1"
+    output-ext:  "pdf"
+    header-includes:
+      - \usepackage{float}
+      - \floatplacement{table}{H}
+---
+
+Github Link: https://github.com/safiaread/homework_5
+
+```{r, echo = F, warning = F, message = F}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, scales, acs, tidyr)
+data <- read.delim("/Users/safiaread/Desktop/homework_5/data/output/acs_medicaid.txt")
+```
+
+Question 1
+```{r, echo = F, warning = F, message = F}
+data%>%
+group_by(year)%>%
+summarise(adult_share = sum(ins_direct)/sum(adult_pop))%>%
+ggplot(aes(y = adult_share, x = year))+
+geom_line()
+```
+
+Question 2
+
+The success of the program may have been affected by Trump-era policies since the reduction begins in 2016.
+
+Question 3
+```{r, echo = F, warning = F, message = F}
+data%>%
+group_by(year)%>%
+summarise(adult_share = sum(ins_medicaid)/sum(adult_pop))%>%
+ggplot(aes(y = adult_share, x = year))+
+geom_line()
+```
+
+Question 4
+```{r, echo = F, warning = F, message = F}
+data <- data%>%
+mutate(expand_14 = ifelse(expand_year != "2014" | is.na(expand_year), FALSE, TRUE))
+
+data%>%
+filter(is.na(expand_year)| expand_14 == TRUE)%>%
+group_by(year, expand_14)%>%
+summarise(adult_share = sum(uninsured)/sum(adult_pop))%>%
+ggplot(aes(y = adult_share, x = year, color = expand_14))+
+geom_line()
+```
+
+Question 5
+```{r, echo = F, warning = F, message = F}
+data <- data%>%
+mutate(expand_14 = ifelse(expand_year != "2014" | is.na(expand_year), "not expanded", "expanded"))
+
+data%>%
+filter(year == "2012" | year == "2015")%>%
+group_by(year, expand_14)%>%
+summarise(percent_uninsured = mean(uninsured/adult_pop, na.rm = T))%>%
+pivot_wider(names_from = expand_14, values_from = percent_uninsured)
+```
+
+Question 6
+```{r, echo = F, warning = F, message = F}
+library(modelsummary)
+
+reg.data <- data %>% filter(expand_year==2014 | is.na(expand_year), !is.na(expand_ever)) %>%
+  mutate(perc_unins=uninsured/adult_pop,
+         post = (year>=2014), 
+         treat=post*expand_ever)
+
+#summary(lm(perc_unins ~ post + expand_ever + post*expand_ever, data=reg.data))
+dd.ins.reg <- lm(perc_unins ~ post + expand_ever + post*expand_ever, data=reg.data)
+modelsummary(list("DD (2014)"=dd.ins.reg),
+             shape=term + statistic ~ model, 
+             gof_map=NA,
+             coef_omit='Intercept',
+             vcov=~State
+         )
+```
+
+Question 7
+```{r, echo = F, warning = F, message = F}
+library(fixest)
+
+m.dd <- lm(perc_unins ~ post + expand_ever + treat, data=reg.data)
+
+m.twfe <- feols(perc_unins ~ treat | State + year, data=reg.data)
+
+msummary(list("DD"=m.dd, "TWFE"=m.twfe),
+         shape=term + statistic ~ model, 
+         gof_map=NA,
+         coef_omit='Intercept',
+         vcov=~State
+         )
+```
+
+Question 8
+
+Yes, the regression is different. This would make sense as the effect for states that adopted the expansion later will probably be different than those that adopted in 2014.
+```{r, echo = F, warning = F, message = F}
+reg.data <- data %>% filter(!is.na(expand_ever)) %>%
+  mutate(perc_unins=uninsured/adult_pop,
+         post = (year>=2014), 
+         treat=post*expand_ever)
+
+m.dd <- lm(perc_unins ~ post + expand_ever + treat, data=reg.data)
+m.twfe <- feols(perc_unins ~ treat | State + year, data=reg.data)
+
+msummary(list("DD"=m.dd, "TWFE"=m.twfe),
+         shape=term + statistic ~ model, 
+         gof_map=NA,
+         coef_omit='Intercept',
+         vcov=~State
+         )
+```
+
+Question 9
+```{r, echo = F, warning = F, message = F}
+reg.dat <- data %>% 
+  filter(expand_year==2014 | is.na(expand_year), !is.na(expand_ever)) %>%
+  mutate(perc_unins=uninsured/adult_pop,
+         post = (year>=2014), 
+         treat=post*expand_ever)
+
+mod.twfe <- feols(perc_unins~i(year, expand_ever, ref=2013) | State + year,
+                  cluster=~State,
+                  data=reg.dat)
+
+iplot(mod.twfe, 
+      xlab = 'Time to treatment',
+      main = 'Event study')
+
+```
+
+Question 10
+```{r, echo = F, warning = F, message = F}
+reg.dat <- data %>% 
+  filter(!is.na(expand_ever)) %>%
+  mutate(perc_unins=uninsured/adult_pop,
+         post = (year>=2014), 
+         treat=post*expand_ever,
+         time_to_treat = ifelse(expand_ever==FALSE, 0, year-expand_year),
+         time_to_treat = ifelse(time_to_treat < -3, -3, time_to_treat))
+
+mod.twfe <- feols(perc_unins~i(time_to_treat, expand_ever, ref=-1) | State + year,
+                  cluster=~State,
+                  data=reg.dat)
+
+iplot(mod.twfe, 
+      xlab = 'Time to treatment',
+      main = 'Event study')
+```
