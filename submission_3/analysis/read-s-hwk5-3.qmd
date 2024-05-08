@@ -1,9 +1,9 @@
 ---
-title: "Homework Five Submission 2"
+title: "Homework Five Submission 3"
 author: "Safia Read"
 format:
   pdf:
-    output-file: "read-s-hwk5-2"
+    output-file: "read-s-hwk5-3"
     output-ext:  "pdf"
     header-includes:
       - \usepackage{float}
@@ -15,35 +15,53 @@ Github Link: https://github.com/safiaread/homework_5
 ```{r, echo = F, warning = F, message = F}
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, scales, acs, tidyr,modelsummary,fixest)
-load("/Users/safiaread/Desktop/homework_5/submission_2/Hwk5_workspace.Rdata")
+load("/Users/safiaread/Desktop/homework_5/submission_3/Hwk5_workspace.Rdata")
 ```
 
-Question 1
+\newpage
+
+**Question 1**
 ```{r, echo = F, warning = F, message = F}
+#| label: fig-directplot
+#| fig-cap: "Share of Individuals with Direct Purchase"
 figure_1
 ```
 
-Question 2
+\newpage
 
-The success of the program may have been affected by Trump-era policies since the reduction begins in 2016. For example, they denied funding for navigators and marketing and decided not to enforce the individual mandate penalty.
+**Question 2**
 
-Question 3
+The success of the program may have been affected by Trump-era policies since the reduction begins in 2016. For example, they denied funding for navigators and marketing and decided not to enforce the individual mandate penalty. Without an individual mandate, there was no negative incentive for people to directly purchase insurance. A lack of marketing and navigators means that people did not understand the system and increased barriers to accessing direct purchase insurance.
+
+\newpage
+
+**Question 3**
 ```{r, echo = F, warning = F, message = F}
+#| label: fig-medicaidplot
+#| fig-cap: "Share of Individuals with Medicaid"
+
 figure_3
 ```
 
-Question 4
+\newpage
+
+**Question 4**
 ```{r, echo = F, warning = F, message = F}
+#| label: fig-uninsuranceplot
+#| fig-cap: "Average Uninsured by Medicaid Expansion"
 figure_4
 ```
 
-Question 5
+\newpage
+
+**Question 5**
 ```{r, echo = F, warning = F, message = F}
 figure_5
 ```
 
-Question 6
-#Model Summary Issues!!!
+\newpage
+
+**Question 6**
 ```{r, echo = F, warning = F, message = F}
 modelsummary(list("DD (2014)"=reg_q6),
              shape=term + statistic ~ model, 
@@ -53,7 +71,9 @@ modelsummary(list("DD (2014)"=reg_q6),
          )
 ```
 
-Question 7
+\newpage
+
+**Question 7**
 ```{r, echo = F, warning = F, message = F}
 modelsummary(list("DD"=m.dd.7, "TWFE"=m.twfe.7),
          shape=term + statistic ~ model, 
@@ -63,7 +83,9 @@ modelsummary(list("DD"=m.dd.7, "TWFE"=m.twfe.7),
          )
 ```
 
-Question 8
+\newpage
+
+**Question 8**
 
 Yes, the regression is different. This would make sense as the effect for states that adopted the expansion later will probably be different than those that adopted in 2014.
 ```{r, echo = F, warning = F, message = F}
@@ -76,7 +98,9 @@ modelsummary(models,
          )
 ```
 
-Question 9
+\newpage
+
+**Question 9**
 ```{r, echo = F, warning = F, message = F}
 iplot(mod.twfe.9, 
       xlab = 'Time to treatment',
@@ -84,7 +108,9 @@ iplot(mod.twfe.9,
 
 ```
 
-Question 10
+\newpage
+
+**Question 10**
 ```{r, echo = F, warning = F, message = F}
 iplot(mod.twfe.10, 
       xlab = 'Time to treatment',
